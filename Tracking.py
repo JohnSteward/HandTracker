@@ -49,12 +49,15 @@ class Hands:
                                         cv2.putText(img, "right", (50, 50), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 0), 2,
                                                     cv2.LINE_4)
                                         print('right')
+                                        self.ControlScheme('right')
                                     if float(point.x) < float(self.prevPos[0]) - 0.1:
                                         cv2.putText(img, "left", (50, 50), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 0), 2,
                                                     cv2.LINE_4)
+                                        self.ControlScheme('left')
                                         print('left')
                                     if float(point.y) < float(self.prevPos[1]) - 0.1:
-                                        cv2.putText(img, "up", (50, 50), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 0), 2, cv2.LINE_4)
+                                        cv2.putText(img, "up", (50, 50), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 0), 2,
+                                                    cv2.LINE_4)
                                         print('up')
                                         self.ControlScheme('up')
                                     if float(point.y) > float(self.prevPos[1]) + 0.1:
@@ -62,7 +65,6 @@ class Hands:
                                                     cv2.LINE_4)
                                         print('down')
                                         self.ControlScheme('down')
-                                        down = True
                                 self.prevPos = [point.x, point.y]
             cv2.imshow("Cam Output", img)
             cv2.waitKey(5)
@@ -72,21 +74,31 @@ class Hands:
         if input == 'up':
             if not self.down:
                 keyPress.keyDown('w')
-                print('going up')
                 self.up = True
             else:
                 keyPress.keyUp('s')
-                print('stop up')
                 self.down = False
         elif input == 'down':
             if not self.up:
                 keyPress.keyDown('s')
-                print('going down')
                 self.down = True
             else:
                 keyPress.keyUp('w')
-                print('stop down')
                 self.up = False
+        elif input == 'left':
+            if not self.right:
+                keyPress.keyDown('a')
+                self.left = True
+            else:
+                keyPress.keyUp('d')
+                self.right = False
+        elif input == 'right':
+            if not self.left:
+                keyPress.keyDown('d')
+                self.right = True
+            else:
+                keyPress.keyUp('a')
+                self.left = False
 
 
 
