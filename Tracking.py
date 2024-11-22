@@ -4,7 +4,7 @@ import mediapipe as mp
 import pyautogui as keyPress
 import keyboard
 
-# Here we can customise our control scheme based on the registered input (maybe make a gui for this later)
+
 
 class Hands:
     def __init__(self, up, down, left, right):
@@ -12,15 +12,18 @@ class Hands:
         self.down = down
         self.left = left
         self.right = right
+        # Capture video from camera (0 is the default)
         self.videoCapture = cv2.VideoCapture(0)
         self.videoCapture.set(cv2.CAP_PROP_FRAME_WIDTH, 1280)
         self.videoCapture.set(cv2.CAP_PROP_FRAME_HEIGHT, 720)
         self.handSol = mp.solutions.hands
-        self.hands = self.handSol.Hands(model_complexity=0, min_detection_confidence=0.4, max_num_hands=1,
-                              min_tracking_confidence=0.4)
+        self.detectCon = 0.7
+        self.trackCon = 0.7
+        self.hands = self.handSol.Hands(model_complexity=1, min_detection_confidence=self.detectCon, max_num_hands=1,
+                              min_tracking_confidence=self.trackCon)
         self.prevPos = []
 
-
+    # Here we do the main loop for tracking and recognising movements to send to the control scheme
     def Tracking(self):
         while True:
             success, img = self.videoCapture.read()
@@ -61,11 +64,10 @@ class Hands:
                                         self.ControlScheme('down')
                                         down = True
                                 self.prevPos = [point.x, point.y]
-                                # cv2.putText(img, str(point.x), (50, 50), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 0), 2, cv2.LINE_4)
             cv2.imshow("Cam Output", img)
             cv2.waitKey(5)
 
-
+    # Here we can customise our control scheme based on the registered input (maybe make a gui for this later)
     def ControlScheme(self, input):
         if input == 'up':
             if not self.down:
@@ -91,6 +93,3 @@ class Hands:
 # Set up the hand tracker
 handTracker = Hands(False, False, False, False)
 handTracker.Tracking()
-# Capture video from camera (0 is the default)
-
-frame = 0
