@@ -69,30 +69,31 @@ class Hands:
             cv2.imshow("Cam Output", img)
             cv2.waitKey(5)
 
-    # Here we can customise our control scheme based on the registered input (maybe make a gui for this later)
-    def ControlScheme(self, input):
-        if input == 'up':
+    # Here we can customise our control scheme based on the registered input (maybe make a gui for this later,
+    # probably using TKinter, but maybe look up something else)
+    def ControlScheme(self, inp):
+        if inp == 'up':
             if not self.down:
                 keyPress.keyDown('w')
                 self.up = True
             else:
                 keyPress.keyUp('s')
                 self.down = False
-        elif input == 'down':
+        elif inp == 'down':
             if not self.up:
                 keyPress.keyDown('s')
                 self.down = True
             else:
                 keyPress.keyUp('w')
                 self.up = False
-        elif input == 'left':
+        elif inp == 'left':
             if not self.right:
                 keyPress.keyDown('a')
                 self.left = True
             else:
                 keyPress.keyUp('d')
                 self.right = False
-        elif input == 'right':
+        elif inp == 'right':
             if not self.left:
                 keyPress.keyDown('d')
                 self.right = True
