@@ -5,6 +5,8 @@ import pyautogui as keyPress
 import keyboard
 import math
 
+from google.protobuf.json_format import MessageToDict
+
 
 class Hands:
     def __init__(self, up, down, left, right):
@@ -23,14 +25,10 @@ class Hands:
                               min_tracking_confidence=self.trackCon)
         self.prevPos = []
 
-    # Here we check whether it is the left or right hand being tracked, so we can have different inputs for each
-    # Return 0 for left hand, 1 for right hand
-    def WhichHand(self):
-        pass
-
     # Here we check whether the user's hand is clenched and therefore do not want to input a gesture
     # We will check the distance between points on the hand and if they are small enough, the hand is clenched
     # (Will probably do distance between tip of index finger and palm)
+    # The 0.2 value has been chosen by intuition
     def IsTracking(self, hand, img):
         handPoints = hand.landmark
         fingerTip = handPoints[8]
@@ -51,6 +49,7 @@ class Hands:
             if success:
                 img = cv2.flip(img, 1)
                 recHands = self.hands.process(img)
+                # Works even when I twist my hand, idk why, research this
                 if recHands.multi_hand_landmarks:
                     # Recognising one hand and storing its position, so we can see how far it has moved
                     for hand in recHands.multi_hand_landmarks:
@@ -60,6 +59,7 @@ class Hands:
                             cv2.circle(img, (x, y), 10, (255, 0, 255), cv2.FILLED)
                             if datapointID == 0:
                                 if self.IsTracking(hand, img):
+                                    handed = MessageToDict(recHands.multi_handedness[0])['classification'][0]['label']
                                     if self.prevPos != []:
 
                                         # Checking if there has been a big movement, using the fact that it cannot pick up big
@@ -67,26 +67,27 @@ class Hands:
 
                                         # Later, include more options, maybe do head movements as well/try to implement a CNN like
                                         # my initial idea, include left and right hand, this will be better for the gesture control scheme
-                                        if float(point.x) > float(self.prevPos[0]) + 0.1:
-                                            cv2.putText(img, "right", (50, 50), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 0), 2,
-                                                        cv2.LINE_4)
-                                            print('right')
-                                            self.ControlScheme('right')
-                                        if float(point.x) < float(self.prevPos[0]) - 0.1:
-                                            cv2.putText(img, "left", (50, 50), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 0), 2,
-                                                        cv2.LINE_4)
-                                            self.ControlScheme('left')
-                                            print('left')
-                                        if float(point.y) < float(self.prevPos[1]) - 0.1:
-                                            cv2.putText(img, "up", (50, 50), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 0), 2,
-                                                        cv2.LINE_4)
-                                            print('up')
-                                            self.ControlScheme('up')
-                                        if float(point.y) > float(self.prevPos[1]) + 0.1:
-                                            cv2.putText(img, "down", (50, 50), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 0), 2,
-                                                        cv2.LINE_4)
-                                            print('down')
-                                            self.ControlScheme('down')
+                                        if handed == 'Right':
+                                            if float(point.x) > float(self.prevPos[0]) + 0.1:
+                                                cv2.putText(img, "right", (50, 50), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 0), 2,
+                                                            cv2.LINE_4)
+                                                print('right')
+                                                self.RightControlScheme('right')
+                                            if float(point.x) < float(self.prevPos[0]) - 0.1:
+                                                cv2.putText(img, "left", (50, 50), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 0), 2,
+                                                            cv2.LINE_4)
+                                                self.RightControlScheme('left')
+                                                print('left')
+                                            if float(point.y) < float(self.prevPos[1]) - 0.1:
+                                                cv2.putText(img, "up", (50, 50), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 0), 2,
+                                                            cv2.LINE_4)
+                                                print('up')
+                                                self.RightControlScheme('up')
+                                            if float(point.y) > float(self.prevPos[1]) + 0.1:
+                                                cv2.putText(img, "down", (50, 50), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 0), 2,
+                                                            cv2.LINE_4)
+                                                print('down')
+                                                self.RightControlScheme('down')
                                     self.prevPos = [point.x, point.y]
                                 else:
                                     # Resetting so it does not register an input when the fist is unclenched
@@ -96,7 +97,7 @@ class Hands:
 
     # Here we can customise our control scheme based on the registered input (maybe make a gui for this later,
     # probably using TKinter, but maybe look up something else)
-    def ControlScheme(self, inp):
+    def RightControlScheme(self, inp):
         if inp == 'up':
             if not self.down:
                 keyPress.keyDown('w')
