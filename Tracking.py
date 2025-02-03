@@ -4,12 +4,15 @@ import mediapipe as mp
 import pyautogui as keyPress
 import keyboard
 import math
+from tkinter import *
+from tkinter import ttk
 
 from google.protobuf.json_format import MessageToDict
 
 
 class Hands:
     def __init__(self, up, down, left, right):
+        self.root = Tk()
         self.up = up
         self.down = down
         self.left = left
@@ -21,9 +24,12 @@ class Hands:
         self.handSol = mp.solutions.hands
         self.detectCon = 0.7
         self.trackCon = 0.7
+        self.controls = []
         self.hands = self.handSol.Hands(model_complexity=1, min_detection_confidence=self.detectCon, max_num_hands=1,
                               min_tracking_confidence=self.trackCon)
         self.prevPos = []
+        self.CustomControls()
+        self.root.mainloop()
 
     # Here we check whether the user's hand is clenched and therefore do not want to input a gesture
     # We will check the distance between points on the hand and if they are small enough, the hand is clenched
@@ -41,6 +47,44 @@ class Hands:
         else:
             return 1
 
+    def SetCustom(self, contList):
+        pass
+
+    def DefaultControls(self):
+        self.controls = ['w','s','a','d']
+        print(self.controls)
+        self.root.quit()
+
+    def CustomControls(self):
+        self.root.title("Controls")
+        dropBox = ['None', 'Left', 'Right', 'Jump', 'Crouch', 'Un-Crouch', 'Stop', 'Pause/Unpause']
+        rightHand = Text(self.root, height=2, width=30)
+        rightHand.pack()
+        rightHand.insert(END, "Right Hand: ")
+        Label(self.root, text="Up").pack()
+        rightUp = ttk.Combobox(self.root, values=dropBox).pack()
+        Label(self.root, text="Down").pack()
+        rightDown = ttk.Combobox(self.root, values=dropBox).pack()
+        Label(self.root, text="Left").pack()
+        rightLeft = ttk.Combobox(self.root, values=dropBox).pack()
+        Label(self.root, text="Right").pack()
+        rightRight = ttk.Combobox(self.root, values=dropBox).pack()
+
+        leftHand= Text(self.root, height=2, width=30)
+        leftHand.pack()
+        leftHand.insert(END, "Left Hand: ")
+        Label(self.root, text="Up").pack()
+        leftUp = ttk.Combobox(self.root, values=dropBox).pack()
+        Label(self.root, text="Down").pack()
+        leftDown = ttk.Combobox(self.root, values=dropBox).pack()
+        Label(self.root, text="Left").pack()
+        leftLeft = ttk.Combobox(self.root, values=dropBox).pack()
+        Label(self.root, text="Right").pack()
+        leftRight = ttk.Combobox(self.root, values=dropBox).pack()
+
+        contList = [rightUp, rightDown, rightLeft, rightRight, leftUp, leftDown, leftLeft, leftRight]
+        setCont = Button(self.root, text="Set Custom", width=10, command=lambda: self.SetCustom(contList)).pack()
+        default = Button(self.root, text="Set Default", width=10, command=lambda: self.DefaultControls()).pack()
 
     # Here we do the main loop for tracking and recognising movements to send to the control scheme
     def Tracking(self):
