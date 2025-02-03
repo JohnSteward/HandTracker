@@ -47,13 +47,16 @@ class Hands:
         else:
             return 1
 
-    def SetCustom(self, contList):
-        pass
+    def SetCustom(self, contList, dropBox):
+        controlList = ['', 'a','d','space','s','releaseS','stop','esc']
+        for i in range(len(contList)):
+            self.controls.append(controlList[dropBox.index(contList[i].get())])
+        self.root.destroy()
 
     def DefaultControls(self):
-        self.controls = ['w','s','a','d']
+        self.controls = ['space', '', 'a', 'd', 'releaseS', 's', 'stop', 'esc']
         print(self.controls)
-        self.root.quit()
+        self.root.destroy()
 
     def CustomControls(self):
         self.root.title("Controls")
@@ -62,28 +65,36 @@ class Hands:
         rightHand.pack()
         rightHand.insert(END, "Right Hand: ")
         Label(self.root, text="Up").pack()
-        rightUp = ttk.Combobox(self.root, values=dropBox).pack()
+        rightUp = ttk.Combobox(self.root, values=dropBox)
+        rightUp.pack()
         Label(self.root, text="Down").pack()
-        rightDown = ttk.Combobox(self.root, values=dropBox).pack()
+        rightDown = ttk.Combobox(self.root, values=dropBox)
+        rightDown.pack()
         Label(self.root, text="Left").pack()
-        rightLeft = ttk.Combobox(self.root, values=dropBox).pack()
+        rightLeft = ttk.Combobox(self.root, values=dropBox)
+        rightLeft.pack()
         Label(self.root, text="Right").pack()
-        rightRight = ttk.Combobox(self.root, values=dropBox).pack()
+        rightRight = ttk.Combobox(self.root, values=dropBox)
+        rightRight.pack()
 
         leftHand= Text(self.root, height=2, width=30)
         leftHand.pack()
         leftHand.insert(END, "Left Hand: ")
         Label(self.root, text="Up").pack()
-        leftUp = ttk.Combobox(self.root, values=dropBox).pack()
+        leftUp = ttk.Combobox(self.root, values=dropBox)
+        leftUp.pack()
         Label(self.root, text="Down").pack()
-        leftDown = ttk.Combobox(self.root, values=dropBox).pack()
+        leftDown = ttk.Combobox(self.root, values=dropBox)
+        leftDown.pack()
         Label(self.root, text="Left").pack()
-        leftLeft = ttk.Combobox(self.root, values=dropBox).pack()
+        leftLeft = ttk.Combobox(self.root, values=dropBox)
+        leftLeft.pack()
         Label(self.root, text="Right").pack()
-        leftRight = ttk.Combobox(self.root, values=dropBox).pack()
+        leftRight = ttk.Combobox(self.root, values=dropBox)
+        leftRight.pack()
 
         contList = [rightUp, rightDown, rightLeft, rightRight, leftUp, leftDown, leftLeft, leftRight]
-        setCont = Button(self.root, text="Set Custom", width=10, command=lambda: self.SetCustom(contList)).pack()
+        setCont = Button(self.root, text="Set Custom", width=10, command=lambda: self.SetCustom(contList, dropBox)).pack()
         default = Button(self.root, text="Set Default", width=10, command=lambda: self.DefaultControls()).pack()
 
     # Here we do the main loop for tracking and recognising movements to send to the control scheme
