@@ -112,7 +112,9 @@ class Hands:
                 if recHands.multi_hand_landmarks:
                     # Recognising one hand and storing its position, so we can see how far it has moved
                     for hand in recHands.multi_hand_landmarks:
-                        handed = MessageToDict(recHands.multi_handedness[0])['classification'][0]['label']
+                        handed = []
+                        for i in recHands.multi_handedness:
+                            handed.append(MessageToDict(i)['classification'][0]['label'])
                         for datapointID, point in enumerate(hand.landmark):
                             h, w, c = img.shape
                             x, y = int(point.x * w), int(point.y * h)
@@ -125,59 +127,59 @@ class Hands:
 
                                         # Checking if there has been a big movement, using the fact that it cannot pick up big
                                         # movements to my advantage, by using the previous position
-
-                                        if handed == 'Right' and self.prevPos[0] != []:
-                                            if float(point.x) > float(self.prevPos[0][0]) + 0.1:
-                                                cv2.putText(img, "right", (50, 50), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 0), 2,
-                                                            cv2.LINE_4)
-                                                print('right')
-                                                self.ControlScheme(3)
-                                            if float(point.x) < float(self.prevPos[0][0]) - 0.1:
-                                                cv2.putText(img, "left", (50, 50), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 0), 2,
-                                                            cv2.LINE_4)
-                                                self.ControlScheme(2)
-                                                print('left')
-                                            if float(point.y) < float(self.prevPos[0][1]) - 0.1:
-                                                cv2.putText(img, "up", (50, 50), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 0), 2,
-                                                            cv2.LINE_4)
-                                                print('up')
-                                                self.ControlScheme(0)
-                                            if float(point.y) > float(self.prevPos[0][1]) + 0.1:
-                                                cv2.putText(img, "down", (50, 50), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 0), 2,
-                                                            cv2.LINE_4)
-                                                print('down')
-                                                self.ControlScheme(1)
+                                        for i in handed:
+                                            if i == 'Right' and self.prevPos[0] != []:
+                                                if float(point.x) > float(self.prevPos[0][0]) + 0.1:
+                                                    cv2.putText(img, "right", (50, 50), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 0), 2,
+                                                                cv2.LINE_4)
+                                                    print('right')
+                                                    self.ControlScheme(3)
+                                                if float(point.x) < float(self.prevPos[0][0]) - 0.1:
+                                                    cv2.putText(img, "left", (50, 50), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 0), 2,
+                                                                cv2.LINE_4)
+                                                    self.ControlScheme(2)
+                                                    print('left')
+                                                if float(point.y) < float(self.prevPos[0][1]) - 0.1:
+                                                    cv2.putText(img, "up", (50, 50), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 0), 2,
+                                                                cv2.LINE_4)
+                                                    print('up')
+                                                    self.ControlScheme(0)
+                                                if float(point.y) > float(self.prevPos[0][1]) + 0.1:
+                                                    cv2.putText(img, "down", (50, 50), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 0), 2,
+                                                                cv2.LINE_4)
+                                                    print('down')
+                                                    self.ControlScheme(1)
+                                                self.prevPos[0] = [point.x, point.y]
+                                            elif i == 'Left' and self.prevPos[1] != []:
+                                                if float(point.x) > float(self.prevPos[1][0]) + 0.1:
+                                                    cv2.putText(img, "right", (50, 50), cv2.FONT_HERSHEY_SIMPLEX, 1,
+                                                                (0, 0, 0), 2,
+                                                                cv2.LINE_4)
+                                                    print('right')
+                                                    self.ControlScheme(7)
+                                                if float(point.x) < float(self.prevPos[1][0]) - 0.1:
+                                                    cv2.putText(img, "left", (50, 50), cv2.FONT_HERSHEY_SIMPLEX, 1,
+                                                                (0, 0, 0), 2,
+                                                                cv2.LINE_4)
+                                                    self.ControlScheme(6)
+                                                    print('left')
+                                                if float(point.y) < float(self.prevPos[1][1]) - 0.1:
+                                                    cv2.putText(img, "up", (50, 50), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 0),
+                                                                2,
+                                                                cv2.LINE_4)
+                                                    print('up')
+                                                    self.ControlScheme(4)
+                                                if float(point.y) > float(self.prevPos[1][1]) + 0.1:
+                                                    cv2.putText(img, "down", (50, 50), cv2.FONT_HERSHEY_SIMPLEX, 1,
+                                                                (0, 0, 0), 2,
+                                                                cv2.LINE_4)
+                                                    print('down')
+                                                    self.ControlScheme(5)
+                                                self.prevPos[1] = [point.x, point.y]
+                                        if handed == 'Right':
                                             self.prevPos[0] = [point.x, point.y]
-                                        elif handed == 'Left' and self.prevPos[1] != []:
-                                            if float(point.x) > float(self.prevPos[1][0]) + 0.1:
-                                                cv2.putText(img, "right", (50, 50), cv2.FONT_HERSHEY_SIMPLEX, 1,
-                                                            (0, 0, 0), 2,
-                                                            cv2.LINE_4)
-                                                print('right')
-                                                self.ControlScheme(7)
-                                            if float(point.x) < float(self.prevPos[1][0]) - 0.1:
-                                                cv2.putText(img, "left", (50, 50), cv2.FONT_HERSHEY_SIMPLEX, 1,
-                                                            (0, 0, 0), 2,
-                                                            cv2.LINE_4)
-                                                self.ControlScheme(6)
-                                                print('left')
-                                            if float(point.y) < float(self.prevPos[1][1]) - 0.1:
-                                                cv2.putText(img, "up", (50, 50), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 0),
-                                                            2,
-                                                            cv2.LINE_4)
-                                                print('up')
-                                                self.ControlScheme(4)
-                                            if float(point.y) > float(self.prevPos[1][1]) + 0.1:
-                                                cv2.putText(img, "down", (50, 50), cv2.FONT_HERSHEY_SIMPLEX, 1,
-                                                            (0, 0, 0), 2,
-                                                            cv2.LINE_4)
-                                                print('down')
-                                                self.ControlScheme(5)
+                                        elif handed == 'Left':
                                             self.prevPos[1] = [point.x, point.y]
-                                    if handed == 'Right':
-                                        self.prevPos[0] = [point.x, point.y]
-                                    elif handed == 'Left':
-                                        self.prevPos[1] = [point.x, point.y]
                                 else:
                                     # Resetting so it does not register an input when the fist is unclenched
                                     self.prevPos = [[],[]]
