@@ -2,6 +2,7 @@ import cv2
 import numpy as np
 import mediapipe as mp
 import pyautogui as keyPress
+import pydirectinput
 import keyboard
 import math
 from tkinter import *
@@ -68,7 +69,7 @@ class Hands:
         self.root.destroy()
 
     def DefaultControls(self):
-        self.controls = ['space', '', 'a', 'd', 'releaseS', 's', 'stop', 'esc']
+        self.controls = ['k', '', 'a', 'd', 'releaseS', 's', 'stop', 'esc']
         print(self.controls)
         self.root.destroy()
 
@@ -202,7 +203,7 @@ class Hands:
             # Here we calibrate our controls
             if success:
                 img = cv2.flip(img, 1)
-                recHands = self.twoHands.process(img)
+                recHands = self.oneHands.process(img)
                 if recHands.multi_hand_landmarks:
                     # Recognising one hand and storing its position, so we can see how far it has moved
                     for hand in recHands.multi_hand_landmarks:
@@ -270,6 +271,10 @@ class Hands:
                                                     print('down')
                                                     self.ControlScheme(5)
                                                 self.prevPos[1] = [point.x, point.y]
+                                    if handed[0] == 'Right':
+                                        self.prevPos[0] = [point.x, point.y]
+                                    elif handed[0] == 'Left':
+                                        self.prevPos[1] = [point.x, point.y]
                                 else:
                                     # Resetting so it does not register an input when the fist is unclenched
                                     self.prevPos = [[],[]]
@@ -281,30 +286,28 @@ class Hands:
 
     def ControlScheme(self, input):
         if self.controls[input] == 'releaseS':
-            keyPress.keyUp('s')
-            print('release')
+            pydirectinput.keyUp('s')
         elif self.controls[input] == 'stop':
             if self.left:
-                keyPress.keyUp('a')
+                pydirectinput.keyUp('a')
                 print('stop left')
                 self.left = False
             if self.right:
-                print('stop left')
-                keyPress.keyUp('d')
+                print('stop right')
+                pydirectinput.keyUp('d')
                 self.right = False
         elif self.controls[input] == 'esc':
-            print('esc')
-            keyPress.press('esc')
+            pydirectinput.press('esc')
+        elif self.controls[input] == 'k':
+            pydirectinput.press('k')
+
         else:
             cont = self.controls[input]
-            print(cont)
-            keyPress.keyDown(cont)
+            pydirectinput.keyDown(cont)
             if cont == 'a':
                 self.left = True
-                self.right = False
             elif cont == 'd':
                 self.right = True
-                self.left = False
 
 
 # Set up the hand tracker
