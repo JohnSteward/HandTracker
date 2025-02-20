@@ -178,8 +178,17 @@ class Hands:
                                                 if (float(point.x) > float(self.prevPos[1][0]) + 0.1) and (handed[0] == 'Left'):
                                                     self.calibVals.append(float(point.x) - float(self.prevPos[1][0]))
                                             elif k == 8:
-                                                cv2.putText(img, "Please clench your fist", (50, 50),
-                                                            cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 0), 2, cv2.LINE_4)
+                                                while True:
+                                                    cv2.putText(img,
+                                                                "Hold your hand at the desired distance and press enter",
+                                                                (50, 50),
+                                                                cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 0), 2, cv2.LINE_4)
+                                                    if keyboard.is_pressed('enter'):
+                                                        fingerTip = hand.landmark[8]
+                                                        palm = hand.landmark[0]
+                                                        distance = math.sqrt(
+                                                            ((fingerTip.x - palm.x) ** 2) + (fingerTip.y - palm.y) ** 2)
+                                                        self.input[-1] = distance
                                         if handed[0] == 'Right':
                                             self.prevPos[0] = [point.x, point.y]
                                         elif handed[0] == 'Left':
