@@ -8,7 +8,6 @@ import math
 from tkinter import *
 from tkinter import ttk
 
-
 from google.protobuf.json_format import MessageToDict
 
 
@@ -26,7 +25,7 @@ class Hands:
         self.videoCapture.set(cv2.CAP_PROP_FRAME_WIDTH, 1280)
         self.videoCapture.set(cv2.CAP_PROP_FRAME_HEIGHT, 720)
         self.handSol = mp.solutions.hands
-        self.detectCon = 0.6
+        self.detectCon = 0.2
         self.trackCon = 0.6
         # Same format as the controls, then the last one is for no input
         self.input = [0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.2]
@@ -179,16 +178,8 @@ class Hands:
                                                 if (float(point.x) > float(self.prevPos[1][0]) + 0.1) and (handed[0] == 'Left'):
                                                     self.calibVals.append(float(point.x) - float(self.prevPos[1][0]))
                                             elif k == 8:
-                                                while True:
-                                                    cv2.putText(img, "Hold your hand at the desired distance and press enter", (50, 50),
-                                                                cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 0), 2, cv2.LINE_4)
-                                                    if keyboard.is_pressed('enter'):
-                                                        fingerTip = hand.landmark[8]
-                                                        palm = hand.landmark[0]
-                                                        distance = math.sqrt(
-                                                            ((fingerTip.x - palm.x) ** 2) + (fingerTip.y - palm.y) ** 2)
-                                                        self.input[-1] = distance
-
+                                                cv2.putText(img, "Please clench your fist", (50, 50),
+                                                            cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 0), 2, cv2.LINE_4)
                                         if handed[0] == 'Right':
                                             self.prevPos[0] = [point.x, point.y]
                                         elif handed[0] == 'Left':
