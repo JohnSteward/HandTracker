@@ -28,7 +28,7 @@ class Hands:
         self.detectCon = 0.2
         self.trackCon = 0.6
         # Same format as the controls, then the last one is for no input
-        self.input = [0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.2]
+        self.input = [0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.4]
         self.calibInp = np.zeros(len(self.input))
         self.calibVals = []
         self.calibrate = False
@@ -37,7 +37,7 @@ class Hands:
                               min_tracking_confidence=self.trackCon)
         self.twoHands = self.handSol.Hands(model_complexity=1, min_detection_confidence=self.detectCon, max_num_hands=2,
                                            min_tracking_confidence=self.trackCon)
-        self.prevPos = [[],[]]
+        self.prevPos = [[0,0],[0,0]]
         self.CustomControls()
         self.root.mainloop()
 
@@ -51,7 +51,7 @@ class Hands:
         fingerTip = handPoints[8]
         palm = handPoints[0]
         distance = math.sqrt(((fingerTip.x - palm.x)**2)+(fingerTip.y - palm.y)**2)
-        if distance < self.input[8]:
+        if distance < (self.input[-1])/2:
             cv2.putText(img, "No Input", (50, 50), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 0), 2,
                         cv2.LINE_4)
             return 0
@@ -117,6 +117,7 @@ class Hands:
     # Check for face when a certain condition is met (like a gesture?), can give us more options for more complex games
 
     def CalibTrack(self):
+        valid = False
         for k in range(len(self.calibInp)):
             while True:
                 success, img = self.videoCapture.read()
@@ -136,17 +137,17 @@ class Hands:
                                 cv2.circle(img, (x, y), 10, (255, 0, 255), cv2.FILLED)
                                 if datapointID == 0:
                                     if self.IsTracking(hand, img):
-                                        if self.prevPos != [[], []]:
+                                        if self.prevPos != [[0,0], [0,0]]:
                                             if k == 0:
                                                 cv2.putText(img, "Please input your right hand upwards", (50, 50),
                                                             cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 0), 2, cv2.LINE_4)
                                                 if (float(point.y) < float(self.prevPos[0][1]) - 0.1) and (handed[0] == 'Right'):
-                                                    self.calibVals.append(float(point.y) - float(self.prevPos[0][1]))
+                                                    self.calibVals.append(float(self.prevPos[0][1]) - float(point.y))
                                             elif k == 1:
                                                 cv2.putText(img, "Please input your right hand downwards", (50, 50),
                                                             cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 0), 2, cv2.LINE_4)
                                                 if (float(point.y) > float(self.prevPos[0][1]) + 0.1) and (handed[0] == 'Right'):
-                                                    self.calibVals.append(float(self.prevPos[0][1]) - float(point.y))
+                                                    self.calibVals.append(float(point.y) - float(self.prevPos[0][1]))
                                             elif k == 2:
                                                 cv2.putText(img, "Please input your right hand left", (50, 50),
                                                             cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 0), 2, cv2.LINE_4)
@@ -161,12 +162,12 @@ class Hands:
                                                 cv2.putText(img, "Please input your left hand upwards", (50, 50),
                                                             cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 0), 2, cv2.LINE_4)
                                                 if (float(point.y) < float(self.prevPos[1][1]) - 0.1) and (handed[0] == 'Left'):
-                                                    self.calibVals.append(float(point.y) - float(self.prevPos[1][1]))
+                                                    self.calibVals.append(float(self.prevPos[1][1]) - float(point.y))
                                             elif k == 5:
                                                 cv2.putText(img, "Please input your left hand downwards", (50, 50),
                                                             cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 0), 2, cv2.LINE_4)
                                                 if (float(point.y) > float(self.prevPos[1][1]) + 0.1) and (handed[0] == 'Left'):
-                                                    self.calibVals.append(float(self.prevPos[1][1]) - float(point.y))
+                                                    self.calibVals.append(float(float(point.y) - self.prevPos[1][1]))
                                             elif k == 6:
                                                 cv2.putText(img, "Please input your left hand left", (50, 50),
                                                             cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 0), 2, cv2.LINE_4)
@@ -178,17 +179,17 @@ class Hands:
                                                 if (float(point.x) > float(self.prevPos[1][0]) + 0.1) and (handed[0] == 'Left'):
                                                     self.calibVals.append(float(point.x) - float(self.prevPos[1][0]))
                                             elif k == 8:
-                                                while True:
-                                                    cv2.putText(img,
-                                                                "Hold your hand at the desired distance and press enter",
-                                                                (50, 50),
-                                                                cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 0), 2, cv2.LINE_4)
-                                                    if keyboard.is_pressed('enter'):
-                                                        fingerTip = hand.landmark[8]
-                                                        palm = hand.landmark[0]
-                                                        distance = math.sqrt(
-                                                            ((fingerTip.x - palm.x) ** 2) + (fingerTip.y - palm.y) ** 2)
-                                                        self.input[-1] = distance
+                                                cv2.putText(img,
+                                                            "Hold your hand at the desired distance and press enter",
+                                                            (50, 50),
+                                                            cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 0), 2, cv2.LINE_4)
+                                                if keyboard.is_pressed('enter'):
+                                                    fingerTip = hand.landmark[8]
+                                                    palm = hand.landmark[0]
+                                                    distance = math.sqrt(
+                                                        ((fingerTip.x - palm.x) ** 2) + (fingerTip.y - palm.y) ** 2)
+                                                    self.input[-1] = distance
+                                                    valid = True
                                         if handed[0] == 'Right':
                                             self.prevPos[0] = [point.x, point.y]
                                         elif handed[0] == 'Left':
@@ -201,8 +202,12 @@ class Hands:
                     self.input[k] = average/3
                     self.calibVals = []
                     break
+                elif valid:
+                    break
                 cv2.imshow("Cam Output", img)
                 cv2.waitKey(5)
+
+        print(self.input)
     def Tracking(self):
         if self.calibrate:
             self.CalibTrack()
@@ -227,12 +232,12 @@ class Hands:
                                 if self.IsTracking(hand, img):
                                     # Checking which hand is in view (left or right) to determine which controls to use
 
-                                    if self.prevPos != [[],[]]:
+                                    if self.prevPos != [[0,0],[0,0]]:
 
                                         # Checking if there has been a big movement, using the fact that it cannot pick up big
                                         # movements to my advantage, by using the previous position
                                         for i in handed:
-                                            if i == 'Right' and self.prevPos[0] != []:
+                                            if i == 'Right' and self.prevPos[0] != [0,0]:
                                                 if float(point.x) > float(self.prevPos[0][0]) + self.input[3]:
                                                     cv2.putText(img, "right", (50, 50), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 0), 2,
                                                                 cv2.LINE_4)
@@ -254,7 +259,7 @@ class Hands:
                                                     print('down')
                                                     self.ControlScheme(1)
                                                 self.prevPos[0] = [point.x, point.y]
-                                            elif i == 'Left' and self.prevPos[1] != []:
+                                            elif i == 'Left' and self.prevPos[1] != [0,0]:
                                                 if float(point.x) > float(self.prevPos[1][0]) + self.input[7]:
                                                     cv2.putText(img, "right", (50, 50), cv2.FONT_HERSHEY_SIMPLEX, 1,
                                                                 (0, 0, 0), 2,
@@ -286,7 +291,7 @@ class Hands:
                                         self.prevPos[1] = [point.x, point.y]
                                 else:
                                     # Resetting so it does not register an input when the fist is unclenched
-                                    self.prevPos = [[],[]]
+                                    self.prevPos = [[0,0],[0,0]]
             cv2.imshow("Cam Output", img)
             cv2.waitKey(1)
 
