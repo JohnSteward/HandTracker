@@ -25,8 +25,9 @@ class Hands:
         self.videoCapture.set(cv2.CAP_PROP_FRAME_WIDTH, 1280)
         self.videoCapture.set(cv2.CAP_PROP_FRAME_HEIGHT, 720)
         self.handSol = mp.solutions.hands
-        self.detectCon = 0.2
-        self.trackCon = 0.6
+        self.face = mp.solutions.face_detection
+        self.detectCon = 0.7
+        self.trackCon = 0.8
         # Same format as the controls, then the last one is for no input
         self.input = [0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.4]
         self.calibInp = np.zeros(len(self.input))
@@ -37,6 +38,7 @@ class Hands:
                               min_tracking_confidence=self.trackCon)
         self.twoHands = self.handSol.Hands(model_complexity=1, min_detection_confidence=self.detectCon, max_num_hands=2,
                                            min_tracking_confidence=self.trackCon)
+        self.faceTrack = self.face.FaceDetection(model_selection=1, min_detection_confidence=self.detectCon)
         self.prevPos = [[0,0],[0,0]]
         self.CustomControls()
         self.root.mainloop()
@@ -214,10 +216,10 @@ class Hands:
             self.calibrate = False
         while True:
             success, img = self.videoCapture.read()
-            # Here we calibrate our controls
             if success:
                 img = cv2.flip(img, 1)
-                recHands = self.oneHands.process(img)
+                img = cv2.cvtColor(img, cv2.COLOR_RGB2BGR)
+                recHands = self.twoHands.process(img)
                 if recHands.multi_hand_landmarks:
                     # Recognising one hand and storing its position, so we can see how far it has moved
                     for hand in recHands.multi_hand_landmarks:
@@ -231,9 +233,7 @@ class Hands:
                             if datapointID == 0:
                                 if self.IsTracking(hand, img):
                                     # Checking which hand is in view (left or right) to determine which controls to use
-
                                     if self.prevPos != [[0,0],[0,0]]:
-
                                         # Checking if there has been a big movement, using the fact that it cannot pick up big
                                         # movements to my advantage, by using the previous position
                                         for i in handed:
@@ -292,6 +292,7 @@ class Hands:
                                 else:
                                     # Resetting so it does not register an input when the fist is unclenched
                                     self.prevPos = [[0,0],[0,0]]
+                                    face = self.faceTrack.process(img)
             cv2.imshow("Cam Output", img)
             cv2.waitKey(1)
 
