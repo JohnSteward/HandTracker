@@ -26,8 +26,8 @@ class Hands:
         self.videoCapture.set(cv2.CAP_PROP_FRAME_HEIGHT, 720)
         self.handSol = mp.solutions.hands
         self.face = mp.solutions.face_detection
-        self.detectCon = 0.9
-        self.trackCon = 0.9
+        self.detectCon = 0.92
+        self.trackCon = 0.92
         # Same format as the controls, then the last one is for no input
         self.input = [0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.4]
         self.calibInp = np.zeros(len(self.input))
@@ -65,13 +65,13 @@ class Hands:
         self.SetCustom(contList, dropBox)
 
     def SetCustom(self, contList, dropBox):
-        controlList = ['', 'a','d','space','s','releaseS','stop','esc']
+        controlList = ['', 'a','d','k', 's','releaseS','stop','n']
         for i in range(len(contList)):
             self.controls.append(controlList[dropBox.index(contList[i].get())])
         self.root.destroy()
 
     def DefaultControls(self):
-        self.controls = ['k', '', 'a', 'd', 'releaseS', 's', 'stop', 'esc']
+        self.controls = ['k', '', 'a', 'd', 'releaseS', 's', 'stop', 'n']
         print(self.controls)
         self.root.destroy()
 
@@ -243,22 +243,22 @@ class Hands:
                                             if float(point.x) > float(self.prevPos[0][0]) + self.input[3]:
                                                 cv2.putText(img, "right", (50, 50), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 0), 2,
                                                             cv2.LINE_4)
-                                                print('right right')
+                                               # print('right right')
                                                 self.ControlScheme(3)
-                                            if float(point.x) < float(self.prevPos[0][0]) - self.input[2]:
+                                            elif float(point.x) < float(self.prevPos[0][0]) - self.input[2]:
                                                 cv2.putText(img, "left", (50, 50), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 0), 2,
                                                             cv2.LINE_4)
                                                 self.ControlScheme(2)
-                                                print('right left')
-                                            if float(point.y) < float(self.prevPos[0][1]) - self.input[0]:
+                                                #print('right left')
+                                            elif float(point.y) < float(self.prevPos[0][1]) - self.input[0]:
                                                 cv2.putText(img, "up", (50, 50), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 0), 2,
                                                             cv2.LINE_4)
-                                                print('right up')
+                                               # print('right up')
                                                 self.ControlScheme(0)
-                                            if float(point.y) > float(self.prevPos[0][1]) + self.input[1]:
+                                            elif float(point.y) > float(self.prevPos[0][1]) + self.input[1]:
                                                 cv2.putText(img, "down", (50, 50), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 0), 2,
                                                             cv2.LINE_4)
-                                                print('right down')
+                                                #print('right down')
                                                 self.ControlScheme(1)
                                             # self.prevPos[0] = [point.x, point.y]
 
@@ -268,25 +268,25 @@ class Hands:
                                                 cv2.putText(img, "right", (50, 50), cv2.FONT_HERSHEY_SIMPLEX, 1,
                                                             (0, 0, 0), 2,
                                                             cv2.LINE_4)
-                                                print('left right')
+                                               # print('left right')
                                                 self.ControlScheme(7)
-                                            if float(point.x) < float(self.prevPos[1][0]) - self.input[6]:
+                                            elif float(point.x) < float(self.prevPos[1][0]) - self.input[6]:
                                                 cv2.putText(img, "left", (50, 50), cv2.FONT_HERSHEY_SIMPLEX, 1,
                                                             (0, 0, 0), 2,
                                                             cv2.LINE_4)
                                                 self.ControlScheme(6)
-                                                print('left left')
-                                            if float(point.y) < float(self.prevPos[1][1]) - self.input[4]:
+                                               # print('left left')
+                                            elif float(point.y) < float(self.prevPos[1][1]) - self.input[4]:
                                                 cv2.putText(img, "up", (50, 50), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 0),
                                                             2,
                                                             cv2.LINE_4)
-                                                print('left up')
+                                              #  print('left up')
                                                 self.ControlScheme(4)
-                                            if float(point.y) > float(self.prevPos[1][1]) + self.input[5]:
+                                            elif float(point.y) > float(self.prevPos[1][1]) + self.input[5]:
                                                 cv2.putText(img, "down", (50, 50), cv2.FONT_HERSHEY_SIMPLEX, 1,
                                                             (0, 0, 0), 2,
                                                             cv2.LINE_4)
-                                                print('left down')
+                                             #   print('left down')
                                                 self.ControlScheme(5)
                                             # self.prevPos[1] = [point.x, point.y]
                                     if handed == 'Right':
@@ -309,10 +309,8 @@ class Hands:
         elif self.controls[input] == 'stop':
             if self.left:
                 pydirectinput.keyUp('a')
-                print('stop left')
                 self.left = False
             if self.right:
-                print('stop right')
                 pydirectinput.keyUp('d')
                 self.right = False
         elif self.controls[input] == 'esc':
@@ -325,8 +323,12 @@ class Hands:
             pydirectinput.keyDown(cont)
             if cont == 'a':
                 self.left = True
+                self.right = False
+                pydirectinput.keyUp('d')
             elif cont == 'd':
                 self.right = True
+                self.left = False
+                pydirectinput.keyUp('a')
 
 
 # Set up the hand tracker
