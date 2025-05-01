@@ -12,7 +12,7 @@ from google.protobuf.json_format import MessageToDict
 
 
 class Hands:
-    # In the initialisation I will make the UI to customise the control scheme (there will be a default if you want to
+    # In the initialisation I will make the UI to customise the control scheme (there is a default if you want to
     # skip it)
     def __init__(self, up, down, left, right):
         self.root = Tk()
@@ -46,8 +46,7 @@ class Hands:
     # Here we check whether the user's hand is clenched and therefore do not want to input a gesture
     # We will check the distance between points on the hand and if they are small enough, the hand is clenched
     # (Will probably do distance between tip of index finger and palm)
-    # The 0.2 value has been chosen by intuition (realised this will change with distance from camera, maybe adjust
-    # according to Z value)
+    # The 0.2 value has been chosen by intuition for default, but calibration allows you to change
     def IsTracking(self, hand, img):
         handPoints = hand.landmark
         fingerTip = handPoints[8]
@@ -59,22 +58,23 @@ class Hands:
             return 0
         else:
             return 1
-
+    # Tells the code that we want to calibrate
     def Calibrate(self, contList, dropBox):
         self.calibrate = True
         self.SetCustom(contList, dropBox)
-
+    # Sets controls based on how you customised them
     def SetCustom(self, contList, dropBox):
         controlList = ['', 'a','d','k', 's','releaseS','stop','n']
         for i in range(len(contList)):
             self.controls.append(controlList[dropBox.index(contList[i].get())])
         self.root.destroy()
-
+    # Sets default controls for those who don't want to customise
     def DefaultControls(self):
         self.controls = ['k', '', 'a', 'd', 'releaseS', 's', 'stop', 'n']
         print(self.controls)
         self.root.destroy()
 
+    # Makes the menu for customising controls
     def CustomControls(self):
         self.root.title("Controls")
         dropBox = ['None', 'Left', 'Right', 'Jump', 'Crouch', 'Un-Crouch', 'Stop', 'Pause/Unpause']
@@ -116,7 +116,7 @@ class Hands:
         default = Button(self.root, text="Set Default", width=10, command=lambda: self.DefaultControls()).pack()
 
 
-
+    # This does the calibration procedure
     def CalibTrack(self):
         valid = False
         for k in range(len(self.calibInp)):
@@ -210,7 +210,7 @@ class Hands:
         print(self.input)
 
     # Here we do the main loop for tracking and recognising movements to send to the control scheme
-    # Check for face when the user has clenched their fist, as they will not register an input with the hands,
+    # Check for face when the user has clenched their fist (FUTURE WORK), as they will not register an input with the hands,
     # can give us more options for more complex games
     def Tracking(self):
         if self.calibrate:
@@ -226,7 +226,6 @@ class Hands:
                     # Recognising each hand and storing its position, so we can see how far it has moved
                     for handID, hand in enumerate(recHands.multi_hand_landmarks):
                         handed = recHands.multi_handedness[handID].classification[0].label
-                        # print(handed)
                         for datapointID, point in enumerate(hand.landmark):
                             h, w, c = img.shape
                             x, y = int(point.x * w), int(point.y * h)
@@ -243,24 +242,19 @@ class Hands:
                                             if float(point.x) > float(self.prevPos[0][0]) + self.input[3]:
                                                 cv2.putText(img, "right", (50, 50), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 0), 2,
                                                             cv2.LINE_4)
-                                               # print('right right')
                                                 self.ControlScheme(3)
                                             elif float(point.x) < float(self.prevPos[0][0]) - self.input[2]:
                                                 cv2.putText(img, "left", (50, 50), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 0), 2,
                                                             cv2.LINE_4)
                                                 self.ControlScheme(2)
-                                                #print('right left')
                                             elif float(point.y) < float(self.prevPos[0][1]) - self.input[0]:
                                                 cv2.putText(img, "up", (50, 50), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 0), 2,
                                                             cv2.LINE_4)
-                                               # print('right up')
                                                 self.ControlScheme(0)
                                             elif float(point.y) > float(self.prevPos[0][1]) + self.input[1]:
                                                 cv2.putText(img, "down", (50, 50), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 0), 2,
                                                             cv2.LINE_4)
-                                                #print('right down')
                                                 self.ControlScheme(1)
-                                            # self.prevPos[0] = [point.x, point.y]
 
                                         elif handed == 'Left' and self.prevPos[1] != [0,0] and \
                                                 (math.sqrt((self.prevPos[1][0] - point.x)**2 + (self.prevPos[1][1] - point.y)**2)) < 0.4:
@@ -268,27 +262,22 @@ class Hands:
                                                 cv2.putText(img, "right", (50, 50), cv2.FONT_HERSHEY_SIMPLEX, 1,
                                                             (0, 0, 0), 2,
                                                             cv2.LINE_4)
-                                               # print('left right')
                                                 self.ControlScheme(7)
                                             elif float(point.x) < float(self.prevPos[1][0]) - self.input[6]:
                                                 cv2.putText(img, "left", (50, 50), cv2.FONT_HERSHEY_SIMPLEX, 1,
                                                             (0, 0, 0), 2,
                                                             cv2.LINE_4)
                                                 self.ControlScheme(6)
-                                               # print('left left')
                                             elif float(point.y) < float(self.prevPos[1][1]) - self.input[4]:
                                                 cv2.putText(img, "up", (50, 50), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 0),
                                                             2,
                                                             cv2.LINE_4)
-                                              #  print('left up')
                                                 self.ControlScheme(4)
                                             elif float(point.y) > float(self.prevPos[1][1]) + self.input[5]:
                                                 cv2.putText(img, "down", (50, 50), cv2.FONT_HERSHEY_SIMPLEX, 1,
                                                             (0, 0, 0), 2,
                                                             cv2.LINE_4)
-                                             #   print('left down')
                                                 self.ControlScheme(5)
-                                            # self.prevPos[1] = [point.x, point.y]
                                     if handed == 'Right':
                                         self.prevPos[0] = [point.x, point.y]
                                     elif handed == 'Left':
@@ -296,12 +285,10 @@ class Hands:
                                 else:
                                     # Resetting so it does not register an input when the fist is unclenched
                                     self.prevPos = [[0,0],[0,0]]
-                                    face = self.faceTrack.process(img)
             cv2.imshow("Cam Output", img)
             cv2.waitKey(1)
 
-    # Here we can customise our control scheme based on the registered input (maybe make a gui for this later,
-    # probably using TKinter, but maybe look up something else)
+    # This is the code to check which input was performed and register the correct key command
 
     def ControlScheme(self, input):
         if self.controls[input] == 'releaseS':
